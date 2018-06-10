@@ -11,6 +11,10 @@ func CheckDepedence() error {
 	if err != nil {
 		return err
 	}
+	err = check("dnsmasq")
+	if err != nil {
+		return err
+	}
 	err = check("ifconfig")
 	if err != nil {
 		return err

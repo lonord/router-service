@@ -10,16 +10,15 @@ import (
 )
 
 type WebService struct {
-	e       *echo.Echo
-	context *MainContext
+	e   *echo.Echo
+	ctx *MainContext
 }
 
 func NewWebService(c *MainContext) *WebService {
-	ec := echo.New()
-	// TODO init
+	ec := createEcho()
 	return &WebService{
-		e:       ec,
-		context: c,
+		e:   ec,
+		ctx: c,
 	}
 }
 
@@ -39,4 +38,10 @@ func (s *WebService) Stop() {
 	if err := s.e.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func createEcho() *echo.Echo {
+	ec := echo.New()
+	// TODO init
+	return ec
 }

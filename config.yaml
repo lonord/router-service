@@ -16,3 +16,8 @@ lan:
 
 # address of bridge, default "192.168.4.1"
 brAddr: '192.168.4.1'
+
+# dnsmasq additional arguments, optional
+# dnsmasqArgs:
+#   - '--resolv-file=/var/run/dnsmasq/resolv.conf'
+#   - '--log-dhcp'

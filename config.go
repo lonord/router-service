@@ -5,10 +5,11 @@ import (
 )
 
 type Config struct {
-	OuterIf    string   `yaml:"outerIf"`
-	BridgeName string   `yaml:"brName"`
-	LanNames   []string `yaml:"lan"`
-	BridgeAddr string   `yaml:"brAddr"`
+	OuterIf     string   `yaml:"outerIf"`
+	BridgeName  string   `yaml:"brName"`
+	LanNames    []string `yaml:"lan"`
+	BridgeAddr  string   `yaml:"brAddr"`
+	DnsmasqArgs []string `yaml:"dnsmasqArgs"`
 }
 
 type ConfigReaderFn func() ([]byte, error)
