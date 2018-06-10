@@ -16,12 +16,12 @@ type NetSpeedStatusContext struct {
 }
 
 func MeasureNetSpeed(timeSpanMilli int) ([]NetSpeed, error) {
-	status1, err := ReadDevStatusDefault()
+	status1, err := readDevStatusDefault()
 	if err != nil {
 		return nil, err
 	}
 	time.Sleep(time.Duration(timeSpanMilli) * time.Millisecond)
-	status2, err := ReadDevStatusDefault()
+	status2, err := readDevStatusDefault()
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func MeasureNetSpeed(timeSpanMilli int) ([]NetSpeed, error) {
 }
 
 func CreateNetSpeedStatusContext() (*NetSpeedStatusContext, error) {
-	s, err := ReadDevStatusDefault()
+	s, err := readDevStatusDefault()
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func CalculateNetSpeed(c *NetSpeedStatusContext) ([]NetSpeed, error) {
 	lt := c.recordTime
 	ls := c.statusMap
 	t := time.Now()
-	s, err := ReadDevStatusDefault()
+	s, err := readDevStatusDefault()
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +54,10 @@ func CalculateNetSpeed(c *NetSpeedStatusContext) ([]NetSpeed, error) {
 	c.recordTime = t
 	c.statusMap = sMap
 	return speedList, nil
+}
+
+func readDevStatusDefault() ([]DevStatus, error) {
+	return ReadDevStatus(DefaultFileReader)
 }
 
 func cal(map1, map2 map[string]DevStatus, timeSpanMilli int) []NetSpeed {

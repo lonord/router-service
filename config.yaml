@@ -1,0 +1,18 @@
+###############################################################################
+#                                                                             #
+#                        configure file of soft router                        #
+#                                                                             #
+###############################################################################
+
+# interface connected to internet, default "eth0"
+outerIf: 'eth0'
+
+# bridge name, default "br-lan"
+brName: 'br-lan'
+
+# Ethernets to add to bridge
+lan:
+  - 'eth1'
+
+# address of bridge, default "192.168.4.1"
+brAddr: '192.168.4.1'

@@ -38,14 +38,12 @@ type DevStatus struct {
 
 type FileReaderFn func(path string) (string, error)
 
-func ReadDevStatusDefault() ([]DevStatus, error) {
-	return ReadDevStatus(func(path string) (string, error) {
-		buff, err := ioutil.ReadFile(path)
-		if err != nil {
-			return "", err
-		}
-		return string(buff), nil
-	})
+func DefaultFileReader(path string) (string, error) {
+	buff, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(buff), nil
 }
 
 func ReadDevStatus(read FileReaderFn) ([]DevStatus, error) {
