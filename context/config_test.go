@@ -1,6 +1,7 @@
-package main
+package context
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -23,6 +24,12 @@ func TestReadConfig2(t *testing.T) {
 	expect(t, c.Cfg.DnsmasqArgs[0], "--resolv-file=/var/run/dnsmasq/resolv.conf")
 	expect(t, c.Cfg.DnsmasqArgs[1], "--log-dhcp")
 	expect(t, c.Cfg.DnsmasqArgs[2], "--port=5353")
+}
+
+func expect(t *testing.T, a interface{}, b interface{}) {
+	if !reflect.DeepEqual(b, a) {
+		t.Errorf("Expected %#v (type %v) - Got %#v (type %v)", b, reflect.TypeOf(b), a, reflect.TypeOf(a))
+	}
 }
 
 func getContentByte() ([]byte, error) {

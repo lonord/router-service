@@ -1,12 +1,15 @@
-package main
+package bridge
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"../cmdutil"
+	"../context"
 )
 
-func SetupBridge(execFn CmdExecutorFn, c *MainContext) error {
+func SetupBridge(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	bridgeList, err := readBridge(execFn)
 	if err != nil {
 		return err
@@ -25,7 +28,7 @@ func SetupBridge(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func ClearBridge(execFn CmdExecutorFn, c *MainContext) error {
+func ClearBridge(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	bridgeList, err := readBridge(execFn)
 	if err != nil {
 		return err
@@ -51,7 +54,7 @@ func findBridge(bridgeList []BridgeInfo, brName string) *BridgeInfo {
 	return nil
 }
 
-func dealCreateBridge(execFn CmdExecutorFn, c *MainContext) error {
+func dealCreateBridge(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	_, err := execFn(fmt.Sprint("brctl addbr ", c.Cfg.BridgeName))
 	if err != nil {
 		return err
@@ -69,7 +72,7 @@ func dealCreateBridge(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func dealDeleteBridge(execFn CmdExecutorFn, info *BridgeInfo) error {
+func dealDeleteBridge(execFn cmdutil.CmdExecutorFn, info *BridgeInfo) error {
 	_, err := execFn(fmt.Sprint("ifconfig ", info.name, " down"))
 	if err != nil {
 		return err
@@ -81,7 +84,7 @@ func dealDeleteBridge(execFn CmdExecutorFn, info *BridgeInfo) error {
 	return nil
 }
 
-func isCurrentSettingValid(info *BridgeInfo, c *MainContext) bool {
+func isCurrentSettingValid(info *BridgeInfo, c *context.MainContext) bool {
 	if info.name != c.Cfg.BridgeName {
 		return false
 	}
@@ -96,7 +99,7 @@ func isCurrentSettingValid(info *BridgeInfo, c *MainContext) bool {
 	return true
 }
 
-func readBridge(execFn CmdExecutorFn) ([]BridgeInfo, error) {
+func readBridge(execFn cmdutil.CmdExecutorFn) ([]BridgeInfo, error) {
 	content, err := execFn("brctl show")
 	if err != nil {
 		return nil, err

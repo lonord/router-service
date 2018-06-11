@@ -1,11 +1,14 @@
-package main
+package forward
 
 import (
 	"fmt"
 	"strings"
+
+	"../cmdutil"
+	"../context"
 )
 
-func SetupForward(execFn CmdExecutorFn, c *MainContext) error {
+func SetupForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	deleteIptablesRule(execFn, c)
 	execFn("echo 1 > /proc/sys/net/ipv4/ip_forward")
 	err := addIptablesRule(execFn, c)
@@ -15,7 +18,7 @@ func SetupForward(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func ClearForward(execFn CmdExecutorFn, c *MainContext) error {
+func ClearForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	err := deleteIptablesRule(execFn, c)
 	if err != nil {
 		return err
@@ -23,7 +26,7 @@ func ClearForward(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func addIptablesRule(execFn CmdExecutorFn, c *MainContext) error {
+func addIptablesRule(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	_, err1 := execFn(fmt.Sprint("iptables -t nat -A ", generateNatRule(c)))
 	_, err2 := execFn(fmt.Sprint("iptables -I ", generateForwardSourceRule(c)))
 	_, err3 := execFn(fmt.Sprint("iptables -I ", generateForwardDestinationRule(c)))
@@ -39,7 +42,7 @@ func addIptablesRule(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func deleteIptablesRule(execFn CmdExecutorFn, c *MainContext) error {
+func deleteIptablesRule(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	_, err1 := execFn(fmt.Sprint("iptables -t nat -D ", generateNatRule(c)))
 	_, err2 := execFn(fmt.Sprint("iptables -D ", generateForwardSourceRule(c)))
 	_, err3 := execFn(fmt.Sprint("iptables -D ", generateForwardDestinationRule(c)))
@@ -55,15 +58,15 @@ func deleteIptablesRule(execFn CmdExecutorFn, c *MainContext) error {
 	return nil
 }
 
-func generateNatRule(c *MainContext) string {
+func generateNatRule(c *context.MainContext) string {
 	return fmt.Sprintf("POSTROUTING -s %s -o %s -j MASQUERADE", dealWithIPNetmask(c.Cfg.BridgeAddr), c.Cfg.OuterIf)
 }
 
-func generateForwardSourceRule(c *MainContext) string {
+func generateForwardSourceRule(c *context.MainContext) string {
 	return fmt.Sprintf("FORWARD -s %s -j ACCEPT", dealWithIPNetmask(c.Cfg.BridgeAddr))
 }
 
-func generateForwardDestinationRule(c *MainContext) string {
+func generateForwardDestinationRule(c *context.MainContext) string {
 	return fmt.Sprintf("FORWARD -d %s -j ACCEPT", dealWithIPNetmask(c.Cfg.BridgeAddr))
 }
 

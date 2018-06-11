@@ -1,12 +1,13 @@
-package main
+package dnsmasq
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os/exec"
 	"strings"
+
+	"../cmdutil"
+	"../context"
 )
 
 type FileReaderFn func(path string) (string, error)
@@ -20,12 +21,12 @@ func DefaultFileReader(path string) (string, error) {
 }
 
 type DnsmasqProcess struct {
-	ctx          *MainContext
+	ctx          *context.MainContext
 	proc         *exec.Cmd
 	fileReaderFn FileReaderFn
 }
 
-func NewDnsmasqProcess(reader FileReaderFn, c *MainContext) *DnsmasqProcess {
+func NewDnsmasqProcess(reader FileReaderFn, c *context.MainContext) *DnsmasqProcess {
 	return &DnsmasqProcess{
 		ctx:          c,
 		fileReaderFn: reader,
@@ -34,7 +35,16 @@ func NewDnsmasqProcess(reader FileReaderFn, c *MainContext) *DnsmasqProcess {
 
 func (p *DnsmasqProcess) Start() error {
 	if !p.isRunning() {
-		//
+		internalArgs := collectInternalArgs(p.fileReaderFn, p.ctx)
+		args := make([]string, len(internalArgs)+len(p.ctx.Cfg.DnsmasqArgs))
+		copy(internalArgs, args)
+		copy(p.ctx.Cfg.DnsmasqArgs, args[len(internalArgs):])
+		cmd := exec.Command("dnsmasq", args...)
+		err := cmdutil.ExecPipeCmd(cmd)
+		if err != nil {
+			return err
+		}
+		p.proc = cmd
 	}
 	return nil
 }
@@ -45,6 +55,7 @@ func (p *DnsmasqProcess) Stop() error {
 		if err != nil {
 			return err
 		}
+		p.proc = nil
 	}
 	return nil
 }
@@ -65,7 +76,7 @@ func (p *DnsmasqProcess) isRunning() bool {
 	return p.proc != nil && !p.proc.ProcessState.Exited()
 }
 
-func collectInternalArgs(fileReaderFn FileReaderFn) []string {
+func collectInternalArgs(fileReaderFn FileReaderFn, c *context.MainContext) []string {
 	args := []string{
 		"--keep-in-foreground",
 		"--conf-dir=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new",
@@ -83,33 +94,8 @@ func collectInternalArgs(fileReaderFn FileReaderFn) []string {
 			args = append(args, a)
 		}
 	}
+	dhcpIPChunks := strings.Split(c.Cfg.BridgeAddr, ".")
+	ipPrefix := strings.Join(dhcpIPChunks[:3], ".")
+	args = append(args, fmt.Sprintf("--dhcp-range=%s.50,%s.250,12h", ipPrefix, ipPrefix))
 	return args
-}
-
-func execCmd(cmd *exec.Cmd) (*exec.Cmd, error) {
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return nil, err
-	}
-	go pipeReader(bufio.NewReader(stdout))
-	go pipeReader(bufio.NewReader(stderr))
-	err = cmd.Start()
-	if err != nil {
-		return nil, err
-	}
-	return cmd, nil
-}
-
-func pipeReader(reader *bufio.Reader) {
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil || io.EOF == err {
-			break
-		}
-		fmt.Printf(line)
-	}
 }

@@ -1,6 +1,9 @@
-package main
+package bridge
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestReadBridge(t *testing.T) {
 	bridgeList, err := readBridge(executeCmd)
@@ -13,6 +16,12 @@ func TestReadBridge(t *testing.T) {
 	expect(t, bridgeList[0].ifList[1], "enx00ed4d680193")
 	expect(t, len(bridgeList[1].ifList), 1)
 	expect(t, bridgeList[1].ifList[0], "veth2648ffe")
+}
+
+func expect(t *testing.T, a interface{}, b interface{}) {
+	if !reflect.DeepEqual(b, a) {
+		t.Errorf("Expected %#v (type %v) - Got %#v (type %v)", b, reflect.TypeOf(b), a, reflect.TypeOf(a))
+	}
 }
 
 func executeCmd(cmd string) (string, error) {
