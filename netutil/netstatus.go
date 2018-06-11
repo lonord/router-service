@@ -2,10 +2,11 @@ package netutil
 
 import (
 	"errors"
-	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"../util"
 )
 
 type DevReceiveStatus struct {
@@ -36,17 +37,7 @@ type DevStatus struct {
 	Transmit DevTransmitStatus
 }
 
-type FileReaderFn func(path string) (string, error)
-
-func DefaultFileReader(path string) (string, error) {
-	buff, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), nil
-}
-
-func ReadDevStatus(read FileReaderFn) ([]DevStatus, error) {
+func ReadDevStatus(read util.FileReaderFn) ([]DevStatus, error) {
 	content, err := read("/proc/net/dev")
 	if err != nil {
 		return nil, err

@@ -2,6 +2,8 @@ package netutil
 
 import (
 	"time"
+
+	"../util"
 )
 
 type NetSpeed struct {
@@ -57,7 +59,7 @@ func CalculateNetSpeed(c *NetSpeedStatusContext) ([]NetSpeed, error) {
 }
 
 func readDevStatusDefault() ([]DevStatus, error) {
-	return ReadDevStatus(DefaultFileReader)
+	return ReadDevStatus(util.DefaultFileReader)
 }
 
 func cal(map1, map2 map[string]DevStatus, timeSpanMilli int) []NetSpeed {

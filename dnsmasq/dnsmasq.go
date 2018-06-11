@@ -2,31 +2,29 @@ package dnsmasq
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os/exec"
+	"strconv"
 	"strings"
 
-	"../cmdutil"
 	"../context"
+	"../util"
 )
 
-type FileReaderFn func(path string) (string, error)
-
-func DefaultFileReader(path string) (string, error) {
-	buff, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), nil
+type DnsmasqLease struct {
+	ExpireTimeStamp uint64
+	MACAddr         string
+	IPAddr          string
+	HostName        string
+	ClientID        string
 }
 
 type DnsmasqProcess struct {
 	ctx          *context.MainContext
 	proc         *exec.Cmd
-	fileReaderFn FileReaderFn
+	fileReaderFn util.FileReaderFn
 }
 
-func NewDnsmasqProcess(reader FileReaderFn, c *context.MainContext) *DnsmasqProcess {
+func NewDnsmasqProcess(reader util.FileReaderFn, c *context.MainContext) *DnsmasqProcess {
 	return &DnsmasqProcess{
 		ctx:          c,
 		fileReaderFn: reader,
@@ -40,7 +38,7 @@ func (p *DnsmasqProcess) Start() error {
 		copy(internalArgs, args)
 		copy(p.ctx.Cfg.DnsmasqArgs, args[len(internalArgs):])
 		cmd := exec.Command("dnsmasq", args...)
-		err := cmdutil.ExecPipeCmd(cmd)
+		err := util.ExecPipeCmd(cmd)
 		if err != nil {
 			return err
 		}
@@ -72,11 +70,25 @@ func (p *DnsmasqProcess) Restart() error {
 	return nil
 }
 
+func (p *DnsmasqProcess) ReadLeases() ([]DnsmasqLease, error) {
+	leaseFilePath := "/var/lib/misc/dnsmasq.leases"
+	for _, arg := range p.ctx.Cfg.DnsmasqArgs {
+		if strings.HasPrefix(arg, "--dhcp-leasefile=") {
+			leaseFilePath = strings.Split(arg, "=")[1]
+		}
+	}
+	leaseFileContent, err := p.fileReaderFn(leaseFilePath)
+	if err != nil {
+		return nil, err
+	}
+	return convertLeases(leaseFileContent), nil
+}
+
 func (p *DnsmasqProcess) isRunning() bool {
 	return p.proc != nil && !p.proc.ProcessState.Exited()
 }
 
-func collectInternalArgs(fileReaderFn FileReaderFn, c *context.MainContext) []string {
+func collectInternalArgs(fileReaderFn util.FileReaderFn, c *context.MainContext) []string {
 	args := []string{
 		"--keep-in-foreground",
 		"--conf-dir=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new",
@@ -98,4 +110,28 @@ func collectInternalArgs(fileReaderFn FileReaderFn, c *context.MainContext) []st
 	ipPrefix := strings.Join(dhcpIPChunks[:3], ".")
 	args = append(args, fmt.Sprintf("--dhcp-range=%s.50,%s.250,12h", ipPrefix, ipPrefix))
 	return args
+}
+
+func convertLeases(leasesContent string) []DnsmasqLease {
+	leases := []DnsmasqLease{}
+	lines := strings.Split(leasesContent, "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		chunks := strings.Split(line, " ")
+		if len(chunks) != 5 {
+			continue
+		}
+		expTime, _ := strconv.ParseUint(chunks[0], 10, 64)
+		l := DnsmasqLease{
+			ExpireTimeStamp: expTime,
+			MACAddr:         chunks[1],
+			IPAddr:          chunks[2],
+			HostName:        chunks[3],
+			ClientID:        chunks[4],
+		}
+		leases = append(leases, l)
+	}
+	return leases
 }

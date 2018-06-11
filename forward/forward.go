@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"../cmdutil"
 	"../context"
+	"../util"
 )
 
-func SetupForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
+func SetupForward(execFn util.CmdExecutorFn, c *context.MainContext) error {
 	deleteIptablesRule(execFn, c)
 	execFn("echo 1 > /proc/sys/net/ipv4/ip_forward")
 	err := addIptablesRule(execFn, c)
@@ -18,7 +18,7 @@ func SetupForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	return nil
 }
 
-func ClearForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
+func ClearForward(execFn util.CmdExecutorFn, c *context.MainContext) error {
 	err := deleteIptablesRule(execFn, c)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func ClearForward(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
 	return nil
 }
 
-func addIptablesRule(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
+func addIptablesRule(execFn util.CmdExecutorFn, c *context.MainContext) error {
 	_, err1 := execFn(fmt.Sprint("iptables -t nat -A ", generateNatRule(c)))
 	_, err2 := execFn(fmt.Sprint("iptables -I ", generateForwardSourceRule(c)))
 	_, err3 := execFn(fmt.Sprint("iptables -I ", generateForwardDestinationRule(c)))
@@ -42,7 +42,7 @@ func addIptablesRule(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error
 	return nil
 }
 
-func deleteIptablesRule(execFn cmdutil.CmdExecutorFn, c *context.MainContext) error {
+func deleteIptablesRule(execFn util.CmdExecutorFn, c *context.MainContext) error {
 	_, err1 := execFn(fmt.Sprint("iptables -t nat -D ", generateNatRule(c)))
 	_, err2 := execFn(fmt.Sprint("iptables -D ", generateForwardSourceRule(c)))
 	_, err3 := execFn(fmt.Sprint("iptables -D ", generateForwardDestinationRule(c)))
