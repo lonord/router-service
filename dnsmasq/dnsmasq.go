@@ -6,8 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"../context"
-	"../util"
+	"../base"
 )
 
 type DnsmasqLease struct {
@@ -19,26 +18,26 @@ type DnsmasqLease struct {
 }
 
 type DnsmasqProcess struct {
-	ctx          *context.MainContext
+	cfg          *ba.Config
 	proc         *exec.Cmd
-	fileReaderFn util.FileReaderFn
+	fileReaderFn ba.FileReaderFn
 }
 
-func NewDnsmasqProcess(reader util.FileReaderFn, c *context.MainContext) *DnsmasqProcess {
+func NewDnsmasqProcess(reader ba.FileReaderFn, c *ba.Config) *DnsmasqProcess {
 	return &DnsmasqProcess{
-		ctx:          c,
+		cfg:          c,
 		fileReaderFn: reader,
 	}
 }
 
 func (p *DnsmasqProcess) Start() error {
 	if !p.isRunning() {
-		internalArgs := collectInternalArgs(p.fileReaderFn, p.ctx)
-		args := make([]string, len(internalArgs)+len(p.ctx.Cfg.DnsmasqArgs))
+		internalArgs := collectInternalArgs(p.fileReaderFn, p.cfg)
+		args := make([]string, len(internalArgs)+len(p.cfg.DnsmasqArgs))
 		copy(internalArgs, args)
-		copy(p.ctx.Cfg.DnsmasqArgs, args[len(internalArgs):])
+		copy(p.cfg.DnsmasqArgs, args[len(internalArgs):])
 		cmd := exec.Command("dnsmasq", args...)
-		err := util.ExecPipeCmd(cmd)
+		err := ba.ExecPipeCmd(cmd)
 		if err != nil {
 			return err
 		}
@@ -72,7 +71,7 @@ func (p *DnsmasqProcess) Restart() error {
 
 func (p *DnsmasqProcess) ReadLeases() ([]DnsmasqLease, error) {
 	leaseFilePath := "/var/lib/misc/dnsmasq.leases"
-	for _, arg := range p.ctx.Cfg.DnsmasqArgs {
+	for _, arg := range p.cfg.DnsmasqArgs {
 		if strings.HasPrefix(arg, "--dhcp-leasefile=") {
 			leaseFilePath = strings.Split(arg, "=")[1]
 		}
@@ -88,7 +87,7 @@ func (p *DnsmasqProcess) isRunning() bool {
 	return p.proc != nil && !p.proc.ProcessState.Exited()
 }
 
-func collectInternalArgs(fileReaderFn util.FileReaderFn, c *context.MainContext) []string {
+func collectInternalArgs(fileReaderFn ba.FileReaderFn, c *ba.Config) []string {
 	args := []string{
 		"--keep-in-foreground",
 		"--conf-dir=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new",
@@ -106,7 +105,7 @@ func collectInternalArgs(fileReaderFn util.FileReaderFn, c *context.MainContext)
 			args = append(args, a)
 		}
 	}
-	dhcpIPChunks := strings.Split(c.Cfg.BridgeAddr, ".")
+	dhcpIPChunks := strings.Split(c.BridgeAddr, ".")
 	ipPrefix := strings.Join(dhcpIPChunks[:3], ".")
 	args = append(args, fmt.Sprintf("--dhcp-range=%s.50,%s.250,12h", ipPrefix, ipPrefix))
 	return args

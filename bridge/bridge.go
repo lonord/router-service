@@ -5,37 +5,48 @@ import (
 	"regexp"
 	"strings"
 
-	"../context"
-	"../util"
+	"../base"
 )
 
-func SetupBridge(execFn util.CmdExecutorFn, c *context.MainContext) error {
-	bridgeList, err := readBridge(execFn)
+type Bridge struct {
+	cfg    *ba.Config
+	execFn ba.CmdExecutorFn
+}
+
+func NewBridge(fn ba.CmdExecutorFn, c *ba.Config) *Bridge {
+	return &Bridge{
+		cfg:    c,
+		execFn: fn,
+	}
+}
+
+func (b *Bridge) SetupBridge() error {
+	bridgeList, err := readBridge(b.execFn)
 	if err != nil {
 		return err
 	}
-	bridge := findBridge(bridgeList, c.Cfg.BridgeName)
+	bridge := findBridge(bridgeList, b.cfg.BridgeName)
 	if bridge != nil {
-		if isCurrentSettingValid(bridge, c) {
+		if isCurrentSettingValid(bridge, b.cfg) {
 			return nil
 		}
-		dealDeleteBridge(execFn, bridge)
+		dealDeleteBridge(b.execFn, bridge)
 	}
-	err = dealCreateBridge(execFn, c)
+	err = dealCreateBridge(b.execFn, b.cfg)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func ClearBridge(execFn util.CmdExecutorFn, c *context.MainContext) error {
-	bridgeList, err := readBridge(execFn)
+func (b *Bridge) ClearBridge() error {
+	bridgeList, err := readBridge(b.execFn)
 	if err != nil {
 		return err
 	}
-	bridge := findBridge(bridgeList, c.Cfg.BridgeName)
+	bridge := findBridge(bridgeList, b.cfg.BridgeName)
 	if bridge != nil {
-		dealDeleteBridge(execFn, bridge)
+		dealDeleteBridge(b.execFn, bridge)
 	}
 	return nil
 }
@@ -54,17 +65,17 @@ func findBridge(bridgeList []BridgeInfo, brName string) *BridgeInfo {
 	return nil
 }
 
-func dealCreateBridge(execFn util.CmdExecutorFn, c *context.MainContext) error {
-	_, err := execFn(fmt.Sprint("brctl addbr ", c.Cfg.BridgeName))
+func dealCreateBridge(execFn ba.CmdExecutorFn, c *ba.Config) error {
+	_, err := execFn(fmt.Sprint("brctl addbr ", c.BridgeName))
 	if err != nil {
 		return err
 	}
-	_, err = execFn(fmt.Sprint("ifconfig ", c.Cfg.BridgeName, " ", c.Cfg.BridgeAddr, " netmask 255.255.255.0 up"))
+	_, err = execFn(fmt.Sprint("ifconfig ", c.BridgeName, " ", c.BridgeAddr, " netmask 255.255.255.0 up"))
 	if err != nil {
 		return err
 	}
-	for _, ifName := range c.Cfg.LanNames {
-		_, err := execFn(fmt.Sprint("brctl addif ", c.Cfg.BridgeName, " ", ifName))
+	for _, ifName := range c.LanNames {
+		_, err := execFn(fmt.Sprint("brctl addif ", c.BridgeName, " ", ifName))
 		if err != nil {
 			return err
 		}
@@ -72,7 +83,7 @@ func dealCreateBridge(execFn util.CmdExecutorFn, c *context.MainContext) error {
 	return nil
 }
 
-func dealDeleteBridge(execFn util.CmdExecutorFn, info *BridgeInfo) error {
+func dealDeleteBridge(execFn ba.CmdExecutorFn, info *BridgeInfo) error {
 	_, err := execFn(fmt.Sprint("ifconfig ", info.name, " down"))
 	if err != nil {
 		return err
@@ -84,22 +95,22 @@ func dealDeleteBridge(execFn util.CmdExecutorFn, info *BridgeInfo) error {
 	return nil
 }
 
-func isCurrentSettingValid(info *BridgeInfo, c *context.MainContext) bool {
-	if info.name != c.Cfg.BridgeName {
+func isCurrentSettingValid(info *BridgeInfo, c *ba.Config) bool {
+	if info.name != c.BridgeName {
 		return false
 	}
-	if len(info.ifList) != len(c.Cfg.LanNames) {
+	if len(info.ifList) != len(c.LanNames) {
 		return false
 	}
 	for i := 0; i < len(info.ifList); i++ {
-		if info.ifList[i] != c.Cfg.LanNames[i] {
+		if info.ifList[i] != c.LanNames[i] {
 			return false
 		}
 	}
 	return true
 }
 
-func readBridge(execFn util.CmdExecutorFn) ([]BridgeInfo, error) {
+func readBridge(execFn ba.CmdExecutorFn) ([]BridgeInfo, error) {
 	content, err := execFn("brctl show")
 	if err != nil {
 		return nil, err

@@ -3,14 +3,12 @@ package dnsmasq
 import (
 	"testing"
 
-	"../context"
+	"../base"
 )
 
 func TestCollectInternalArgs(t *testing.T) {
-	c := &context.MainContext{
-		Cfg: context.Config{
-			BridgeAddr: "192.168.8.1",
-		},
+	c := &ba.Config{
+		BridgeAddr: "192.168.8.1",
 	}
 	args := collectInternalArgs(func(path string) (string, error) {
 		return dsContent, nil

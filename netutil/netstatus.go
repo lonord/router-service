@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"../util"
+	"../base"
 )
 
 type DevReceiveStatus struct {
@@ -37,7 +37,7 @@ type DevStatus struct {
 	Transmit DevTransmitStatus
 }
 
-func ReadDevStatus(read util.FileReaderFn) ([]DevStatus, error) {
+func ReadDevStatus(read ba.FileReaderFn) ([]DevStatus, error) {
 	content, err := read("/proc/net/dev")
 	if err != nil {
 		return nil, err

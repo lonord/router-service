@@ -1,4 +1,4 @@
-package context
+package ba
 
 import (
 	"gopkg.in/yaml.v2"
@@ -14,16 +14,15 @@ type Config struct {
 
 type ConfigReaderFn func() ([]byte, error)
 
-func ReadConfig(readConfig ConfigReaderFn, c *MainContext) error {
+func ReadConfig(readConfig ConfigReaderFn) (*Config, error) {
 	content, err := readConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	cfg := Config{}
 	err = yaml.Unmarshal(content, &cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	c.Cfg = cfg
-	return nil
+	return &cfg, nil
 }
