@@ -6,19 +6,22 @@ import (
 	"log"
 	"time"
 
+	"../base"
 	"github.com/labstack/echo"
 )
 
 type WebService struct {
 	e   *echo.Echo
-	ctx *MainContext
+	cfg *ba.Config
+	act *MainAction
 }
 
-func NewWebService(c *MainContext) *WebService {
+func NewWebService(act *MainAction, cfg *ba.Config) *WebService {
 	ec := createEcho()
 	return &WebService{
 		e:   ec,
-		ctx: c,
+		cfg: cfg,
+		act: act,
 	}
 }
 

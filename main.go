@@ -5,17 +5,7 @@ import (
 
 	"./app"
 	"./base"
-	"./bridge"
-	"./dnsmasq"
-	"./forward"
 )
-
-type serviceContext struct {
-	webService *app.WebService
-	dnsmasq    *dnsmasq.DnsmasqProcess
-	bridge     *bridge.Bridge
-	forward    *forward.Forward
-}
 
 func main() {
 	err := run()
@@ -36,18 +26,18 @@ func run() error {
 		return err
 	}
 	// service ctx
-	ctx := &serviceContext{}
+	ctx := app.NewMainContext(cfg)
 	// start
-	startService(ctx, cfg)
+	startService(ctx)
 	return nil
 }
 
-func startService(ctx *serviceContext, cfg *ba.Config) error {
+func startService(ctx *app.MainContext) error {
 	//
 	return nil
 }
 
-func stopService(ctx *serviceContext) error {
+func stopService(ctx *app.MainContext) error {
 	//
 	return nil
 }
