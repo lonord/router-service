@@ -3,6 +3,7 @@ package app
 import (
 	"../base"
 	"../bridge"
+	"../client"
 	"../dnsmasq"
 	"../forward"
 	"../netutil"
@@ -63,8 +64,8 @@ func (a *MainAction) CreateNetSpeedReader() (*WrappedNetSpeedReader, error) {
 	}, nil
 }
 
-func (a *MainAction) GetDnsmasqClients() ([]dnsmasq.DnsmasqLease, error) {
-	return a.sub.Dnsmasq.ReadLeases()
+func (a *MainAction) GetOnlineClients() ([]client.ClientInfo, error) {
+	return client.ReadClients(ba.DefaultCmdExecutor, a.cfg)
 }
 
 func (a *MainAction) RestartDnsmasq() error {

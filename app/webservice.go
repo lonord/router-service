@@ -56,8 +56,8 @@ func createEcho() *echo.Echo {
 
 func bindRouters(ec *echo.Echo, action *MainAction) {
 	// get dnsmasq leases
-	ec.GET("/data/dnsmasq/clients", func(c echo.Context) error {
-		r, err := action.GetDnsmasqClients()
+	ec.GET("/clients", func(c echo.Context) error {
+		r, err := action.GetOnlineClients()
 		if err != nil {
 			return err
 		}

@@ -19,6 +19,10 @@ func CheckDepedence() error {
 	if err != nil {
 		return err
 	}
+	err = check("arp")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

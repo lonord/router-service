@@ -3,19 +3,10 @@ package dnsmasq
 import (
 	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"../base"
 )
-
-type DnsmasqLease struct {
-	ExpireTimeStamp uint64 `json:"expire"`
-	MACAddr         string `json:"mac"`
-	IPAddr          string `json:"ip"`
-	HostName        string `json:"host"`
-	ClientID        string `json:"clientId"`
-}
 
 type DnsmasqProcess struct {
 	cfg          *ba.Config
@@ -69,20 +60,6 @@ func (p *DnsmasqProcess) Restart() error {
 	return nil
 }
 
-func (p *DnsmasqProcess) ReadLeases() ([]DnsmasqLease, error) {
-	leaseFilePath := "/var/lib/misc/dnsmasq.leases"
-	for _, arg := range p.cfg.DnsmasqArgs {
-		if strings.HasPrefix(arg, "--dhcp-leasefile=") {
-			leaseFilePath = strings.Split(arg, "=")[1]
-		}
-	}
-	leaseFileContent, err := p.fileReaderFn(leaseFilePath)
-	if err != nil {
-		return nil, err
-	}
-	return convertLeases(leaseFileContent), nil
-}
-
 func (p *DnsmasqProcess) isRunning() bool {
 	return p.proc != nil && !p.proc.ProcessState.Exited()
 }
@@ -109,28 +86,4 @@ func collectInternalArgs(fileReaderFn ba.FileReaderFn, c *ba.Config) []string {
 	ipPrefix := strings.Join(dhcpIPChunks[:3], ".")
 	args = append(args, fmt.Sprintf("--dhcp-range=%s.50,%s.250,12h", ipPrefix, ipPrefix))
 	return args
-}
-
-func convertLeases(leasesContent string) []DnsmasqLease {
-	leases := []DnsmasqLease{}
-	lines := strings.Split(leasesContent, "\n")
-	for _, line := range lines {
-		if line == "" {
-			continue
-		}
-		chunks := strings.Split(line, " ")
-		if len(chunks) != 5 {
-			continue
-		}
-		expTime, _ := strconv.ParseUint(chunks[0], 10, 64)
-		l := DnsmasqLease{
-			ExpireTimeStamp: expTime,
-			MACAddr:         chunks[1],
-			IPAddr:          chunks[2],
-			HostName:        chunks[3],
-			ClientID:        chunks[4],
-		}
-		leases = append(leases, l)
-	}
-	return leases
 }
