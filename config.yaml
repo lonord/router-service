@@ -4,20 +4,26 @@
 #                                                                             #
 ###############################################################################
 
-# interface connected to internet, default "eth0"
+# interface connected to internet
 outerIf: 'eth0'
 
-# bridge name, default "br-lan"
+# bridge name
 brName: 'br-lan'
 
 # Ethernets to add to bridge
 lan:
   - 'eth1'
 
-# address of bridge, default "192.168.4.1"
+# address of bridge
 brAddr: '192.168.4.1'
 
 # dnsmasq additional arguments, optional
 # dnsmasqArgs:
 #   - '--resolv-file=/var/run/dnsmasq/resolv.conf'
 #   - '--log-dhcp'
+
+# rpc hostname, default 0.0.0.0
+# rpcHost: '0.0.0.0'
+
+#rpc port, default 2018
+# rpcPort: 2018

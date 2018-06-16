@@ -15,8 +15,8 @@ type SubProcess struct {
 }
 
 type MainContext struct {
-	Cfg        *ba.Config
-	Action     *MainAction
+	cfg        *ba.Config
+	action     *MainAction
 	WebService *WebService
 	SubProcess *SubProcess
 }
@@ -29,9 +29,9 @@ func NewMainContext(cfg *ba.Config) *MainContext {
 	}
 	action := NewMainAction(sub, cfg)
 	return &MainContext{
-		Cfg:        cfg,
+		cfg:        cfg,
 		SubProcess: sub,
-		Action:     action,
+		action:     action,
 		WebService: NewWebService(action, cfg),
 	}
 }
@@ -65,6 +65,10 @@ func (a *MainAction) CreateNetSpeedReader() (*WrappedNetSpeedReader, error) {
 
 func (a *MainAction) GetDnsmasqClients() ([]dnsmasq.DnsmasqLease, error) {
 	return a.sub.Dnsmasq.ReadLeases()
+}
+
+func (a *MainAction) RestartDnsmasq() error {
+	return a.sub.Dnsmasq.Restart()
 }
 
 type NetStatus struct {

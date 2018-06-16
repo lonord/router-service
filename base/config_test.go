@@ -13,6 +13,8 @@ func TestReadConfig(t *testing.T) {
 	expect(t, cfg.BridgeAddr, "192.168.4.1")
 	expect(t, cfg.LanNames[0], "eth1")
 	expect(t, len(cfg.DnsmasqArgs), 0)
+	expect(t, cfg.RPCHost, "0.0.0.0")
+	expect(t, cfg.RPCPort, 2018)
 }
 
 func TestReadConfig2(t *testing.T) {
@@ -62,6 +64,12 @@ brAddr: '192.168.4.1'
 # dnsmasqArgs:
 #  - '--resolv-file=/var/run/dnsmasq/resolv.conf'
 #  - '--log-dhcp'
+
+# rpc hostname, default 0.0.0.0
+# rpcHost: '0.0.0.0'
+
+#rpc port, default 2018
+# rpcPort: 2018
 `
 
 const configContent2 = `
@@ -89,4 +97,10 @@ dnsmasqArgs:
   - '--resolv-file=/var/run/dnsmasq/resolv.conf'
   - '--log-dhcp'
   - '--port=5353'
+
+# rpc hostname, default 0.0.0.0
+# rpcHost: '0.0.0.0'
+
+#rpc port, default 2018
+# rpcPort: 2018
 `

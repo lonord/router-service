@@ -10,11 +10,11 @@ import (
 )
 
 type DnsmasqLease struct {
-	ExpireTimeStamp uint64
-	MACAddr         string
-	IPAddr          string
-	HostName        string
-	ClientID        string
+	ExpireTimeStamp uint64 `json:"expire"`
+	MACAddr         string `json:"mac"`
+	IPAddr          string `json:"ip"`
+	HostName        string `json:"host"`
+	ClientID        string `json:"clientId"`
 }
 
 type DnsmasqProcess struct {

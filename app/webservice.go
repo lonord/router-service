@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"../base"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type WebService struct {
@@ -18,6 +20,7 @@ type WebService struct {
 
 func NewWebService(act *MainAction, cfg *ba.Config) *WebService {
 	ec := createEcho()
+	bindRouters(ec, act)
 	return &WebService{
 		e:   ec,
 		cfg: cfg,
@@ -25,10 +28,10 @@ func NewWebService(act *MainAction, cfg *ba.Config) *WebService {
 	}
 }
 
-func (s *WebService) Start(port int, hostname string) {
-	addr := fmt.Sprintf(hostname, ":", port)
+func (s *WebService) Start() {
+	addr := fmt.Sprintf(s.cfg.RPCHost, ":", s.cfg.RPCPort)
 	go func() {
-		log.Println("server listens at http://", hostname, ":", port)
+		log.Println("server listens at http://", addr)
 		if err := s.e.Start(addr); err != nil {
 			log.Println("shutting down the server")
 		}
@@ -45,6 +48,27 @@ func (s *WebService) Stop() {
 
 func createEcho() *echo.Echo {
 	ec := echo.New()
-	// TODO init
+	ec.Use(middleware.Logger())
+	ec.Use(middleware.Recover())
+	ec.Use(middleware.CORS())
 	return ec
+}
+
+func bindRouters(ec *echo.Echo, action *MainAction) {
+	// get dnsmasq leases
+	ec.GET("/data/dnsmasq/clients", func(c echo.Context) error {
+		r, err := action.GetDnsmasqClients()
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, r)
+	})
+	// restart dnsmasq
+	ec.PUT("/action/dnsmasq/restart", func(c echo.Context) error {
+		err := action.RestartDnsmasq()
+		if err != nil {
+			return err
+		}
+		return c.String(http.StatusOK, "OK")
+	})
 }
