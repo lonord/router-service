@@ -34,6 +34,6 @@ func ReadConfig(readConfig ConfigReaderFn) (*Config, error) {
 	if cfg.RPCPort == 0 {
 		cfg.RPCPort = 2018
 	}
-	log.Println("config readed: ", cfg)
+	log.Printf("config readed: %+v", cfg)
 	return &cfg, nil
 }

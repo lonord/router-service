@@ -52,6 +52,7 @@ func run() error {
 			case syscall.SIGTERM:
 				log.Println("got signal ", sig.String())
 				stopService(ctx)
+				return nil
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -36,6 +37,7 @@ func (b *Bridge) SetupBridge() error {
 	if err != nil {
 		return err
 	}
+	log.Println("bridge setted up")
 	return nil
 }
 
@@ -48,6 +50,7 @@ func (b *Bridge) ClearBridge() error {
 	if bridge != nil {
 		dealDeleteBridge(b.execFn, bridge)
 	}
+	log.Println("bridge cleared")
 	return nil
 }
 

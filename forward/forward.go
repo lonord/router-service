@@ -2,6 +2,7 @@ package forward
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"../base"
@@ -26,6 +27,7 @@ func (f *Forward) SetupForward() error {
 	if err != nil {
 		return err
 	}
+	log.Println("iptables rules setted up")
 	return nil
 }
 
@@ -34,13 +36,14 @@ func (f *Forward) ClearForward() error {
 	if err != nil {
 		return err
 	}
+	log.Println("iptables rules cleared")
 	return nil
 }
 
 func addIptablesRule(execFn ba.CmdExecutorFn, c *ba.Config) error {
-	_, err1 := execFn(fmt.Sprint("iptables -t nat -A ", generateNatRule(c)))
-	_, err2 := execFn(fmt.Sprint("iptables -I ", generateForwardSourceRule(c)))
-	_, err3 := execFn(fmt.Sprint("iptables -I ", generateForwardDestinationRule(c)))
+	_, err1 := execFn(fmt.Sprint("iptables -t nat -A", generateNatRule(c)))
+	_, err2 := execFn(fmt.Sprint("iptables -I", generateForwardSourceRule(c)))
+	_, err3 := execFn(fmt.Sprint("iptables -I", generateForwardDestinationRule(c)))
 	if err1 != nil {
 		return err1
 	}
@@ -54,9 +57,9 @@ func addIptablesRule(execFn ba.CmdExecutorFn, c *ba.Config) error {
 }
 
 func deleteIptablesRule(execFn ba.CmdExecutorFn, c *ba.Config) error {
-	_, err1 := execFn(fmt.Sprint("iptables -t nat -D ", generateNatRule(c)))
-	_, err2 := execFn(fmt.Sprint("iptables -D ", generateForwardSourceRule(c)))
-	_, err3 := execFn(fmt.Sprint("iptables -D ", generateForwardDestinationRule(c)))
+	_, err1 := execFn(fmt.Sprint("iptables -t nat -D", generateNatRule(c)))
+	_, err2 := execFn(fmt.Sprint("iptables -D", generateForwardSourceRule(c)))
+	_, err3 := execFn(fmt.Sprint("iptables -D", generateForwardDestinationRule(c)))
 	if err1 != nil {
 		return err1
 	}
@@ -82,6 +85,5 @@ func generateForwardDestinationRule(c *ba.Config) string {
 }
 
 func dealWithIPNetmask(ip string) string {
-	ipChunks := strings.Split(ip, ".")
-	return strings.Join([]string{ipChunks[0], ipChunks[1], ipChunks[2], "0/24"}, ".")
+	return strings.Join([]string{ba.GetSubnetPrefix(ip), ".0/24"}, "")
 }

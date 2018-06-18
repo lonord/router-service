@@ -34,9 +34,13 @@ func ReadClients(execFn ba.CmdExecutorFn, cfg *ba.Config) ([]ClientInfo, error) 
 		if !strings.Contains(chunks[3], ":") {
 			continue
 		}
+		ip := chunks[1][1 : len(chunks[1])-1]
+		if !strings.HasPrefix(ip, ba.GetSubnetPrefix(cfg.BridgeAddr)) {
+			continue
+		}
 		client := ClientInfo{
 			HostName: chunks[0],
-			IPAddr:   chunks[1][1 : len(chunks[1])-1],
+			IPAddr:   ip,
 			MACAddr:  chunks[3],
 		}
 		clients = append(clients, client)

@@ -29,7 +29,7 @@ func NewWebService(act *MainAction, cfg *ba.Config) *WebService {
 }
 
 func (s *WebService) Start() {
-	addr := fmt.Sprintf(s.cfg.RPCHost, ":", s.cfg.RPCPort)
+	addr := fmt.Sprintf("%s:%d", s.cfg.RPCHost, s.cfg.RPCPort)
 	go func() {
 		log.Println("server listens at http://", addr)
 		if err := s.e.Start(addr); err != nil {
