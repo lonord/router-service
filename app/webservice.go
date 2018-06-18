@@ -10,6 +10,7 @@ import (
 	"../base"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/lonord/sse"
 )
 
 type WebService struct {
@@ -55,6 +56,7 @@ func createEcho() *echo.Echo {
 }
 
 func bindRouters(ec *echo.Echo, action *MainAction) {
+	nss := newNetSpeedService(action)
 	// get dnsmasq leases
 	ec.GET("/clients", func(c echo.Context) error {
 		r, err := action.GetOnlineClients()
@@ -70,5 +72,10 @@ func bindRouters(ec *echo.Echo, action *MainAction) {
 			return err
 		}
 		return c.String(http.StatusOK, "OK")
+	})
+	// sse net speed
+	ec.Any("/netspeed", func(c echo.Context) error {
+		nss.handleClient(sse.GenerateClientID(), c.Response().Writer)
+		return nil
 	})
 }

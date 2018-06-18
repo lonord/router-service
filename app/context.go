@@ -73,8 +73,8 @@ func (a *MainAction) RestartDnsmasq() error {
 }
 
 type NetStatus struct {
-	InnerNetSpeed netutil.NetSpeed
-	OuterNetSpeed netutil.NetSpeed
+	InnerNetSpeed netutil.NetSpeed `json:"inner"`
+	OuterNetSpeed netutil.NetSpeed `json:"outer"`
 }
 
 type WrappedNetSpeedReader struct {

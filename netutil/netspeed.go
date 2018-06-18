@@ -7,9 +7,9 @@ import (
 )
 
 type NetSpeed struct {
-	DevName       string
-	ReceiveSpeed  uint64
-	TransmitSpeed uint64
+	DevName       string `json:"name"`
+	ReceiveSpeed  uint64 `json:"recv"`
+	TransmitSpeed uint64 `json:"send"`
 }
 
 type NetSpeedReader struct {

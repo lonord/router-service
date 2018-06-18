@@ -119,8 +119,7 @@ func collectInternalArgs(fileReaderFn ba.FileReaderFn, c *ba.Config) []string {
 			args = append(args, a)
 		}
 	}
-	dhcpIPChunks := strings.Split(c.BridgeAddr, ".")
-	ipPrefix := strings.Join(dhcpIPChunks[:3], ".")
+	ipPrefix := ba.GetSubnetPrefix(c.BridgeAddr)
 	args = append(args, fmt.Sprintf("--dhcp-range=%s.50,%s.250,12h", ipPrefix, ipPrefix))
 	return args
 }
