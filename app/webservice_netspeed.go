@@ -20,6 +20,7 @@ type netSpeedService struct {
 
 func newNetSpeedService(action *MainAction) *netSpeedService {
 	return &netSpeedService{
+		sse:    sse.NewService(),
 		action: action,
 	}
 }
