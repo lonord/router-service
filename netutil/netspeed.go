@@ -49,7 +49,7 @@ func (n *NetSpeedReader) Read() ([]NetSpeed, error) {
 		return nil, err
 	}
 	sMap := convertToDevStatusMapWithFilter(s, n.targetDevs)
-	speedList := cal(sMap, ls, int((t.UnixNano()-lt.UnixNano())/1000))
+	speedList := cal(sMap, ls, int((t.UnixNano()-lt.UnixNano())/1000000))
 	n.recordTime = t
 	n.statusMap = sMap
 	return speedList, nil
