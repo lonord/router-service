@@ -49,13 +49,13 @@ func (n *NetSpeedReader) Read() ([]NetSpeed, error) {
 		return nil, err
 	}
 	sMap := convertToDevStatusMapWithFilter(s, n.targetDevs)
-	speedList := cal(sMap, ls, int((t.UnixNano()-lt.UnixNano())/1000000))
+	speedList := cal(ls, sMap, uint64((t.UnixNano()-lt.UnixNano())/1000000))
 	n.recordTime = t
 	n.statusMap = sMap
 	return speedList, nil
 }
 
-func MeasureNetSpeed(timeSpanMilli int) ([]NetSpeed, error) {
+func MeasureNetSpeed(timeSpanMilli uint64) ([]NetSpeed, error) {
 	status1, err := readDevStatusDefault()
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func readDevStatusDefault() ([]DevStatus, error) {
 	return ReadDevStatus(ba.DefaultFileReader)
 }
 
-func cal(map1, map2 map[string]DevStatus, timeSpanMilli int) []NetSpeed {
+func cal(map1, map2 map[string]DevStatus, timeSpanMilli uint64) []NetSpeed {
 	speedList := []NetSpeed{}
 	for name := range map2 {
 		s1, ok1 := map1[name]
