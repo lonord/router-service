@@ -20,7 +20,9 @@ type netSpeedService struct {
 
 func newNetSpeedService(action *MainAction) *netSpeedService {
 	return &netSpeedService{
-		sse:    sse.NewService(),
+		sse: sse.NewServiceWithOption(sse.Option{
+			Headers: map[string]string{"X-Accel-Buffering": "no"},
+		}),
 		action: action,
 	}
 }
