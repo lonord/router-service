@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type Bridge struct {

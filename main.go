@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"./app"
-	"./base"
+	"github.com/lonord/router-service/app"
+	"github.com/lonord/router-service/base"
 )
 
 func main() {

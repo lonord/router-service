@@ -3,7 +3,7 @@ package client
 import (
 	"testing"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 func TestReadClients(t *testing.T) {

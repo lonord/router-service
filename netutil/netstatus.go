@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type DevReceiveStatus struct {

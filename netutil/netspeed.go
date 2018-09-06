@@ -3,7 +3,7 @@ package netutil
 import (
 	"time"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type NetSpeed struct {

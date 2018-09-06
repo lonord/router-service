@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type ClientInfo struct {

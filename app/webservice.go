@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"../base"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/lonord/router-service/base"
 	"github.com/lonord/sse"
 )
 

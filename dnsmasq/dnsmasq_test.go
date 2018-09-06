@@ -3,7 +3,7 @@ package dnsmasq
 import (
 	"testing"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 func TestCollectInternalArgs(t *testing.T) {

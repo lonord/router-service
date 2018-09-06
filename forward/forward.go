@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type Forward struct {

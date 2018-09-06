@@ -1,12 +1,12 @@
 package app
 
 import (
-	"../base"
-	"../bridge"
-	"../client"
-	"../dnsmasq"
-	"../forward"
-	"../netutil"
+	"github.com/lonord/router-service/base"
+	"github.com/lonord/router-service/bridge"
+	"github.com/lonord/router-service/client"
+	"github.com/lonord/router-service/dnsmasq"
+	"github.com/lonord/router-service/forward"
+	"github.com/lonord/router-service/netutil"
 )
 
 type SubProcess struct {

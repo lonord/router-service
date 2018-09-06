@@ -8,7 +8,7 @@ import (
 	"sync"
 	"syscall"
 
-	"../base"
+	"github.com/lonord/router-service/base"
 )
 
 type DnsmasqProcess struct {
