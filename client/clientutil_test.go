@@ -9,6 +9,7 @@ import (
 func TestReadClients(t *testing.T) {
 	cfg := &ba.Config{
 		BridgeName: "br-lan",
+		BridgeAddr: "192.168.4.1",
 	}
 	clients, err := ReadClients(func(s string) (string, error) {
 		return arpResult, nil

@@ -14,7 +14,7 @@ type ClientInfo struct {
 }
 
 func ReadClients(execFn ba.CmdExecutorFn, cfg *ba.Config) ([]ClientInfo, error) {
-	output, err := execFn(fmt.Sprintf("arp -a -i %s", cfg.BridgeName))
+	output, err := execFn(fmt.Sprintf("arp -a -H ether -i %s", cfg.BridgeName))
 	if err != nil {
 		return nil, err
 	}
